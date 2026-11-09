@@ -1,0 +1,123 @@
+﻿@page "/maestro-detalle-lectores"
+@inject IRepositorio Repositorio
+
+<h3 class="text-center mt-4 mb-4">Consulta: Préstamos por Lector</h3>
+
+<div class="row">
+    <div class="col-md-5">
+        <div class="card shadow-sm">
+            <div class="card-header bg-dark text-white fw-bold">
+                <i class="bi bi-people-fill"></i> MAESTRO: Lectores
+            </div>
+            <div class="card-body p-0">
+                @if (lectores == null)
+                {
+                    <div class="p-3 text-center">Cargando lectores...</div>
+                }
+                else
+                {
+                    <table class="table table-hover mb-0" style="cursor: pointer;">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Doc.</th>
+                                <th>Nombre del Lector</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var lector in lectores)
+                            {
+                     
+                                <tr @onclick="() => SeleccionarLector(lector)" 
+                                    class="@(lectorSeleccionado?.Idlector == lector.Idlector ? "table-primary fw-bold" : "")">
+                                    <td>@lector.Documento</td>
+                                    <td>@lector.Nombre</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+    </div>
+
+
+    <div class="col-md-7">
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white fw-bold">
+                <i class="bi bi-journal-check"></i> DETALLE: Préstamos de @(lectorSeleccionado?.Nombre ?? "...")
+            </div>
+            <div class="card-body">
+                @if (lectorSeleccionado == null)
+                {
+                    <div class="alert alert-secondary text-center mb-0">
+                        👈 Haz clic en un lector de la tabla izquierda para ver su historial.
+                    </div>
+                }
+                else if (prestamosDetalle == null)
+                {
+                    <div class="text-center p-3">Cargando préstamos...</div>
+                }
+                else if (!prestamosDetalle.Any())
+                {
+                    <div class="alert alert-success text-center mb-0">
+                        Este lector no tiene historial de préstamos.
+                    </div>
+                }
+                else
+                {
+                    <table class="table table-bordered table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID Préstamo</th>
+                                <th>Cód. Libro</th>
+                                <th>Fecha Préstamo</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var prestamo in prestamosDetalle)
+                            {
+                                <tr>
+                                    <td>@prestamo.IdPrestamo</td>
+                                    <td>@prestamo.Codlibro</td>
+                                    <td>@prestamo.FechaPrestamo.ToString("dd/MM/yyyy")</td>
+                                    <td>
+                                        @if (prestamo.Estado == "A")
+                                        {
+                                            <span class="badge bg-warning text-dark">Activo</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Reintegrado</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<Lectore>? lectores;
+    private Lectore? lectorSeleccionado;
+    private List<Prestamo>? prestamosDetalle;
+
+    protected override async Task OnInitializedAsync()
+    {
+  
+        lectores = await Repositorio.GetAsync<List<Lectore>>("api/lectores");
+    }
+
+    private async Task SeleccionarLector(Lectore lector)
+    {
+        lectorSeleccionado = lector;
+        prestamosDetalle = null; 
+
+        var url = $"api/prestamos/lector/{lector.Idlector}";
+        prestamosDetalle = await Repositorio.GetAsync<List<Prestamo>>(url);
+    }
+}

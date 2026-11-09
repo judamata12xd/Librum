@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="AppEscritorio/AppEscritorio.csproj" Id="db8ce523-61fe-46c4-955b-ad654f678c80" />
+  <Project Path="Controlador/Controlador.csproj" />
+  <Project Path="Modelo/Modelo.csproj" />
+  <Project Path="Vista/Vista.csproj" />
+</Solution>

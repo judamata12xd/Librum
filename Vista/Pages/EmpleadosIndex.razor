@@ -1,0 +1,181 @@
+﻿@page "/empleados"
+@inject IRepositorio Repositorio
+
+<h3 class="text-center mt-4">Gestión de Empleados</h3>
+<div class="d-flex justify-content-end mb-3">
+    <button class="btn btn-primary" @onclick="MostrarFormulario">
+        Agregar Empleado
+    </button>
+</div>
+
+@if (mostrarAlerta)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @mensajeAlerta
+        <button type="button" class="btn-close" @onclick="() => mostrarAlerta = false"></button>
+    </div>
+}
+
+@if (empleados == null)
+{
+    <div class="text-center">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p>Cargando empleados...</p>
+    </div>
+}
+else if (!empleados.Any())
+{
+    <div class="alert alert-info text-center">No hay empleados registrados.</div>
+}
+else
+{
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Documento</th>
+                <th>Nombre</th>
+                <th>Usuario</th>
+                <th>ID Rol</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var emp in empleados)
+            {
+                <tr>
+                    <td>@emp.IdEmpleado</td>
+                    <td>@emp.Documento</td>
+                    <td>@emp.Nombre</td>
+                    <td>@emp.Usuario</td>
+                    <td>@emp.Idrol</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm me-2" @onclick="() => EditarEmpleado(emp)">Editar</button>
+                        <button class="btn btn-danger btn-sm" @onclick="() => EliminarEmpleado(emp.IdEmpleado)">Eliminar</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@if (mostrarFormulario)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(isEditing ? "Editar Empleado" : "Agregar Empleado")</h5>
+                    <button type="button" class="btn-close" @onclick="Cancelar"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="empleadoActual" OnValidSubmit="GuardarEmpleado">
+
+                        <div class="mb-3">
+                            <label class="form-label">Documento:</label>
+                            <InputText class="form-control" @bind-Value="empleadoActual.Documento" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Nombre Completo:</label>
+                            <InputText class="form-control" @bind-Value="empleadoActual.Nombre" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Usuario:</label>
+                            <InputText class="form-control" @bind-Value="empleadoActual.Usuario" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Clave:</label>
+                            <!-- type="password" oculta los caracteres mientras escribes -->
+                            <InputText type="password" class="form-control" @bind-Value="empleadoActual.Clave" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">ID Rol:</label>
+                            <InputNumber class="form-control" @bind-Value="empleadoActual.Idrol" />
+                        </div>
+
+                        <div class="d-flex justify-content-end mt-3">
+                            <button type="submit" class="btn btn-success me-2">Guardar</button>
+                            <button type="button" class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<Empleado>? empleados;
+    private Empleado empleadoActual = new();
+    private bool mostrarFormulario = false;
+    private bool isEditing = false;
+    private string? mensajeAlerta;
+    private bool mostrarAlerta = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarEmpleados();
+    }
+
+    private async Task CargarEmpleados()
+    {
+        var url = "api/empleados";
+        empleados = await Repositorio.GetAsync<List<Empleado>>(url);
+    }
+
+    private void MostrarFormulario()
+    {
+        empleadoActual = new Empleado();
+        isEditing = false;
+        mostrarFormulario = true;
+    }
+
+    private void EditarEmpleado(Empleado emp)
+    {
+        empleadoActual = new Empleado
+        {
+            IdEmpleado = emp.IdEmpleado,
+            Documento = emp.Documento,
+            Nombre = emp.Nombre,
+            Usuario = emp.Usuario,
+            Clave = emp.Clave,
+            Idrol = emp.Idrol
+        };
+        isEditing = true;
+        mostrarFormulario = true;
+    }
+
+    private async Task GuardarEmpleado()
+    {
+        var url1 = "api/empleados";
+        var url2 = $"api/empleados/{empleadoActual.IdEmpleado}";
+
+        if (!isEditing)
+            await Repositorio.PostAsync(url1, empleadoActual);
+        else
+            await Repositorio.PutAsync(url2, empleadoActual);
+
+        await CargarEmpleados();
+        mostrarFormulario = false;
+        mensajeAlerta = "Empleado guardado exitosamente.";
+        mostrarAlerta = true;
+    }
+
+    private async Task EliminarEmpleado(int id)
+    {
+        var url2 = $"api/empleados/{id}";
+        await Repositorio.DeleteAsync(url2);
+        await CargarEmpleados();
+        mensajeAlerta = "Empleado eliminado exitosamente.";
+        mostrarAlerta = true;
+    }
+
+    private void Cancelar()
+    {
+        mostrarFormulario = false;
+    }
+}

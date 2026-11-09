@@ -1,0 +1,186 @@
+﻿@page "/lectores"
+@inject IRepositorio Repositorio
+
+<h3 class="text-center mt-4">Gestión de Lectores</h3>
+<div class="d-flex justify-content-end mb-3">
+    <button class="btn btn-primary" @onclick="MostrarFormulario">
+        Agregar Lector
+    </button>
+</div>
+
+@if (mostrarAlerta)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @mensajeAlerta
+        <button type="button" class="btn-close" @onclick="() => mostrarAlerta = false"></button>
+    </div>
+}
+
+@if (lectores == null)
+{
+    <div class="text-center">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p>Cargando lectores...</p>
+    </div>
+}
+else if (!lectores.Any())
+{
+    <div class="alert alert-info text-center">No hay lectores registrados.</div>
+}
+else
+{
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Documento</th>
+                <th>Nombre</th>
+                <th>Tipo Lector</th>
+                <th>Usuario</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var lector in lectores)
+            {
+                <tr>
+                    <td>@lector.Idlector</td>
+                    <td>@lector.Documento</td>
+                    <td>@lector.Nombre</td>
+                    <td>@lector.TipoLector</td>
+                    <td>@lector.Usuario</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm me-2" @onclick="() => EditarLector(lector)">Editar</button>
+                        <button class="btn btn-danger btn-sm" @onclick="() => EliminarLector(lector.Idlector)">Eliminar</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@if (mostrarFormulario)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(isEditing ? "Editar Lector" : "Agregar Lector")</h5>
+                    <button type="button" class="btn-close" @onclick="Cancelar"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="lectorActual" OnValidSubmit="GuardarLector">
+
+                        <div class="mb-3">
+                            <label class="form-label">Documento:</label>
+                            <InputText class="form-control" @bind-Value="lectorActual.Documento" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Nombre Completo:</label>
+                            <InputText class="form-control" @bind-Value="lectorActual.Nombre" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Tipo de Lector (Ej. Estudiante, Profesor):</label>
+                            <InputText class="form-control" @bind-Value="lectorActual.TipoLector" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Usuario:</label>
+                            <InputText class="form-control" @bind-Value="lectorActual.Usuario" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Clave:</label>
+                            <InputText type="password" class="form-control" @bind-Value="lectorActual.Clave" required />
+                        </div>
+
+                    
+
+                        <div class="d-flex justify-content-end mt-3">
+                            <button type="submit" class="btn btn-success me-2">Guardar</button>
+                            <button type="button" class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<Lectore>? lectores;
+    private Lectore lectorActual = new();
+    private bool mostrarFormulario = false;
+    private bool isEditing = false;
+    private string? mensajeAlerta;
+    private bool mostrarAlerta = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarLectores();
+    }
+
+    private async Task CargarLectores()
+    {
+        var url = "api/lectores";
+        lectores = await Repositorio.GetAsync<List<Lectore>>(url);
+    }
+
+    private void MostrarFormulario()
+    {
+        lectorActual = new Lectore();
+        isEditing = false;
+        mostrarFormulario = true;
+    }
+
+    private void EditarLector(Lectore lector)
+    {
+        lectorActual = new Lectore
+        {
+            Idlector = lector.Idlector,
+            Documento = lector.Documento,
+            Nombre = lector.Nombre,
+            TipoLector = lector.TipoLector,
+            Usuario = lector.Usuario,
+            Clave = lector.Clave,
+            Idrol = lector.Idrol
+        };
+        isEditing = true;
+        mostrarFormulario = true;
+    }
+
+    private async Task GuardarLector()
+    {
+
+        lectorActual.Idrol = 3;
+
+        var url1 = "api/lectores";
+        var url2 = $"api/lectores/{lectorActual.Idlector}";
+
+        if (!isEditing)
+            await Repositorio.PostAsync(url1, lectorActual);
+        else
+            await Repositorio.PutAsync(url2, lectorActual);
+
+        await CargarLectores();
+        mostrarFormulario = false;
+        mensajeAlerta = "Lector guardado exitosamente.";
+        mostrarAlerta = true;
+    }
+
+    private async Task EliminarLector(int id)
+    {
+        var url2 = $"api/lectores/{id}";
+        await Repositorio.DeleteAsync(url2);
+        await CargarLectores();
+        mensajeAlerta = "Lector eliminado exitosamente.";
+        mostrarAlerta = true;
+    }
+
+    private void Cancelar()
+    {
+        mostrarFormulario = false;
+    }
+}
