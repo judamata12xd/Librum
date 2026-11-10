@@ -1,0 +1,116 @@
+﻿@page "/mis-prestamos"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@attribute [Authorize(Roles = "3, 4")]
+@inject IRepositorio Repositorio
+@inject AuthenticationStateProvider AuthStateProvider
+
+<h3 class="text-center mt-4">Mis Préstamos y Novedades</h3>
+
+@if (prestamos == null || libros == null)
+{
+    <div class="text-center">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p>Cargando tus préstamos...</p>
+    </div>
+}
+else if (!prestamos.Any())
+{
+    <div class="alert alert-info text-center mt-4">No tienes préstamos registrados actualmente.</div>
+}
+else
+{
+    <table class="table table-striped table-hover mt-4">
+        <thead class="table-dark">
+            <tr>
+                <th>ID Préstamo</th>
+                <th>Nombre del Libro</th>
+                <th>Fecha de Préstamo</th>
+                <th>Fecha Devolución Esperada</th>
+                <th>Estado</th>
+                <th>Multa / Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var prestamo in prestamos)
+            {
+                // Buscamos el nombre del libro usando el código
+                var libroEncontrado = libros.FirstOrDefault(l => l.Codlibro == prestamo.Codlibro);
+                string nombreLibro = libroEncontrado?.Nombre ?? $"Libro #{prestamo.Codlibro}";
+
+                // Lógica de multa: Si está activo ("A") y la fecha de devolución ya pasó de hoy
+                bool tieneMulta = prestamo.Estado == "A" && prestamo.FechaDevolucionE < DateTime.Now;
+
+                <tr>
+                    <td>@prestamo.IdPrestamo</td>
+                    <td>@nombreLibro</td>
+                    <td>@prestamo.FechaPrestamo.ToString("dd/MM/yyyy")</td>
+                    <td>@prestamo.FechaDevolucionE.ToString("dd/MM/yyyy")</td>
+                    <td>
+                        @if (prestamo.Estado == "A")
+                        {
+                            <span class="badge bg-warning text-dark">Activo</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">Reintegrado</span>
+                        }
+                    </td>
+                    <td>
+                        @if (tieneMulta)
+                        {
+                            <span class="badge bg-danger">Con Multa (Vencido)</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Al día / Sin Multa</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Prestamo>? prestamos;
+    private List<Libro>? libros;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // 1. Cargamos el catálogo de libros para poder cruzar los nombres
+            libros = await Repositorio.GetAsync<List<Libro>>("api/Libros") ?? new List<Libro>();
+
+            // 2. Obtenemos el usuario autenticado
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            var username = user.Identity?.Name ?? user.FindFirst(ClaimTypes.Name)?.Value;
+
+            if (!string.IsNullOrEmpty(username))
+            {
+                var lectores = await Repositorio.GetAsync<List<Lectore>>("api/lectores");
+                var lectorActual = lectores?.FirstOrDefault(l => l.Usuario.ToLower() == username.ToLower());
+
+                if (lectorActual != null)
+                {
+                    var url = $"api/Prestamos/lector/{lectorActual.Idlector}";
+                    prestamos = await Repositorio.GetAsync<List<Prestamo>>(url);
+                }
+            }
+
+            if (prestamos == null)
+            {
+                prestamos = new List<Prestamo>();
+            }
+        }
+        catch (Exception)
+        {
+            prestamos = new List<Prestamo>();
+            libros = new List<Libro>();
+        }
+    }
+}

@@ -1,8 +1,15 @@
 ﻿@inherits LayoutComponentBase
+@inject NavigationManager Navigation
+
 <div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+    <AuthorizeView>
+        <Authorized>
+            <!-- El menú lateral SOLO se muestra si el usuario está autenticado -->
+            <div class="sidebar">
+                <NavMenu />
+            </div>
+        </Authorized>
+    </AuthorizeView>
 
     <main>
         <div class="top-row px-4">

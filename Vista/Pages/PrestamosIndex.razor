@@ -1,7 +1,10 @@
 ﻿@page "/prestamos"
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = "1, 2")]
 @inject IRepositorio Repositorio
 
 <h3 class="text-center mt-4">Novedades: Gestión de Préstamos</h3>
+
 <div class="d-flex justify-content-end mb-3">
     <button class="btn btn-primary" @onclick="MostrarFormulario">
         Nuevo Préstamo
@@ -16,7 +19,7 @@
     </div>
 }
 
-@if (prestamos == null)
+@if (prestamos == null || libros == null || lectores == null)
 {
     <div class="text-center">
         <div class="spinner-border text-primary" role="status"></div>
@@ -33,21 +36,40 @@ else
         <thead class="table-dark">
             <tr>
                 <th>ID</th>
-                <th>Cód. Libro</th>
-                <th>ID Lector</th>
+                <th>Nombre del Libro</th>
+                <th>Lector</th>
                 <th>Fecha Préstamo</th>
                 <th>Fecha Esperada</th>
                 <th>Estado</th>
+                <th>Multa / Valor</th>
                 <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
             @foreach (var prestamo in prestamos)
             {
+              
+                var libroEncontrado = libros.FirstOrDefault(l => l.Codlibro == prestamo.Codlibro);
+                string nombreLibro = libroEncontrado?.Nombre ?? $"Libro #{prestamo.Codlibro}";
+
+                
+                var lectorEncontrado = lectores.FirstOrDefault(l => l.Idlector == prestamo.Idlector);
+                string nombreLector = lectorEncontrado?.Nombre ?? $"Lector #{prestamo.Idlector}";
+
+             
+                bool tieneMulta = prestamo.Estado == "A" && prestamo.FechaDevolucionE < DateTime.Now;
+                decimal valorMulta = 0;
+                if (tieneMulta)
+                {
+                    int diasRetraso = (DateTime.Now - prestamo.FechaDevolucionE).Days;
+                    if (diasRetraso < 1) diasRetraso = 1;
+                    valorMulta = diasRetraso * 5000;
+                }
+
                 <tr>
                     <td>@prestamo.IdPrestamo</td>
-                    <td>@prestamo.Codlibro</td>
-                    <td>@prestamo.Idlector</td>
+                    <td>@nombreLibro</td>
+                    <td>@nombreLector</td>
                     <td>@prestamo.FechaPrestamo.ToString("dd/MM/yyyy")</td>
                     <td>@prestamo.FechaDevolucionE.ToString("dd/MM/yyyy")</td>
                     <td>
@@ -58,6 +80,16 @@ else
                         else
                         {
                             <span class="badge bg-success">Reintegrado</span>
+                        }
+                    </td>
+                    <td>
+                        @if (tieneMulta)
+                        {
+                            <span class="badge bg-danger">Vencido - $@valorMulta.ToString("N0")</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Sin Multa</span>
                         }
                     </td>
                     <td>
@@ -123,6 +155,8 @@ else
 
 @code {
     private List<Prestamo>? prestamos;
+    private List<Libro>? libros;
+    private List<Lectore>? lectores;
     private Prestamo prestamoActual = new();
     private bool mostrarFormulario = false;
     private string? mensajeAlerta;
@@ -130,13 +164,23 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        await CargarPrestamos();
+        await CargarDatos();
     }
 
-    private async Task CargarPrestamos()
+    private async Task CargarDatos()
     {
-        var url = "api/prestamos";
-        prestamos = await Repositorio.GetAsync<List<Prestamo>>(url);
+        try
+        {
+            libros = await Repositorio.GetAsync<List<Libro>>("api/Libros") ?? new List<Libro>();
+            lectores = await Repositorio.GetAsync<List<Lectore>>("api/lectores") ?? new List<Lectore>();
+            prestamos = await Repositorio.GetAsync<List<Prestamo>>("api/Prestamos") ?? new List<Prestamo>();
+        }
+        catch (Exception)
+        {
+            libros = new List<Libro>();
+            lectores = new List<Lectore>();
+            prestamos = new List<Prestamo>();
+        }
     }
 
     private void MostrarFormulario()
@@ -144,18 +188,18 @@ else
         prestamoActual = new Prestamo
         {
             FechaPrestamo = DateTime.Now,
-            FechaDevolucionE = DateTime.Now.AddDays(7), 
-            Estado = "A" 
+            FechaDevolucionE = DateTime.Now.AddDays(7),
+            Estado = "A"
         };
         mostrarFormulario = true;
     }
 
     private async Task GuardarPrestamo()
     {
-        var url = "api/prestamos";
+        var url = "api/Prestamos";
         await Repositorio.PostAsync(url, prestamoActual);
 
-        await CargarPrestamos();
+        await CargarDatos();
         mostrarFormulario = false;
         mensajeAlerta = "Préstamo registrado exitosamente.";
         mostrarAlerta = true;
@@ -166,10 +210,10 @@ else
         prestamo.Estado = "R";
         prestamo.FechaDevolucionR = DateTime.Now;
 
-        var url = $"api/prestamos/{prestamo.IdPrestamo}";
+        var url = $"api/Prestamos/{prestamo.IdPrestamo}";
         await Repositorio.PutAsync(url, prestamo);
 
-        await CargarPrestamos();
+        await CargarDatos();
         mensajeAlerta = "Libro reintegrado exitosamente.";
         mostrarAlerta = true;
     }

@@ -1,0 +1,125 @@
+﻿@page "/registro"
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<div class="row justify-content-center mt-5 mb-5">
+    <div class="col-md-5">
+        <div class="card shadow">
+            <div class="card-body">
+                <h3 class="text-center mb-4">Crear Nueva Cuenta - Librum</h3>
+
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="alert alert-danger" role="alert">
+                        @errorMessage
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(successMessage))
+                {
+                    <div class="alert alert-success" role="alert">
+                        @successMessage
+                    </div>
+                }
+
+                <EditForm Model="registroModel" OnValidSubmit="HandleRegistro">
+                    <DataAnnotationsValidator />
+
+                    <div class="mb-3">
+                        <label>Documento:</label>
+                        <InputText @bind-Value="registroModel.Documento" class="form-control" placeholder="Ingrese su documento" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Nombre Completo:</label>
+                        <InputText @bind-Value="registroModel.Nombre" class="form-control" placeholder="Ingrese su nombre" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Tipo de Lector:</label>
+                        <InputSelect @bind-Value="registroModel.TipoLector" class="form-control">
+                            <option value="">Seleccione un tipo...</option>
+                            <option value="Estudiante">Estudiante</option>
+                            <option value="Profesor">Profesor</option>
+                        </InputSelect>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Nombre de Usuario:</label>
+                        <InputText @bind-Value="registroModel.Usuario" class="form-control" placeholder="Elige un usuario" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Contraseña:</label>
+                        <InputText type="password" @bind-Value="registroModel.Clave" class="form-control" placeholder="Elige una contraseña" />
+                    </div>
+
+                    <button type="submit" class="btn btn-success w-100 mb-3">Registrarse</button>
+                </EditForm>
+
+                <div class="text-center mt-3">
+                    <a href="/login" class="btn btn-outline-primary btn-sm w-100">¿Ya tienes una cuenta? Inicia sesión</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private RegistroRequest registroModel = new();
+    private string errorMessage;
+    private string successMessage;
+
+    private async Task HandleRegistro()
+    {
+        errorMessage = string.Empty;
+        successMessage = string.Empty;
+
+  
+        if (registroModel.TipoLector == "Estudiante")
+        {
+            registroModel.IdRol = 3;
+        }
+        else if (registroModel.TipoLector == "Profesor")
+        {
+            registroModel.IdRol = 4;
+        }
+        else
+        {
+            errorMessage = "Por favor, seleccione un tipo de lector válido.";
+            return;
+        }
+
+        try
+        {
+            var response = await Http.PostAsJsonAsync("api/Lectores", registroModel);
+
+            if (response.IsSuccessStatusCode)
+            {
+                successMessage = "¡Registro exitoso! Redirigiendo al login...";
+                StateHasChanged();
+                
+                await Task.Delay(2000); 
+                Navigation.NavigateTo("/login");
+            }
+            else
+            {
+                errorMessage = "No se pudo completar el registro. Verifica los datos o intenta con otro usuario.";
+            }
+        }
+        catch (Exception)
+        {
+            errorMessage = "Error al conectar con el servidor.";
+        }
+    }
+
+    public class RegistroRequest
+    {
+        public string Documento { get; set; }
+        public string Nombre { get; set; }
+        public string TipoLector { get; set; }
+        public string Usuario { get; set; }
+        public string Clave { get; set; }
+        public int IdRol { get; set; }
+    }
+}
