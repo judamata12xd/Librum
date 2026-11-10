@@ -1,6 +1,6 @@
 ﻿<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">Vista</a>
+        <a class="navbar-brand" href="">Biblioteca</a>
         <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -9,61 +9,82 @@
 
 <div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
     <nav class="nav flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="libros">
-                <span class="bi bi-book-half" aria-hidden="true"></span> Gestión de Libros
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="autores"> 
-                <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> Autores
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="empleados">
-                <span class="bi bi-briefcase-fill" aria-hidden="true"></span> Empleados
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="lectores">
-                <span class="bi bi-people-fill" aria-hidden="true"></span> Lectores
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="prestamos">
-                <span class="bi bi-arrow-left-right" aria-hidden="true"></span> Novedades
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="maestro-detalle-lectores">
-                <span class="bi bi-card-list" aria-hidden="true"></span> Historial Lectores
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="reporte-prestamos">
-                <span class="bi bi-file-earmark-bar-graph" aria-hidden="true"></span> Reporte Vista SQL
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-            </NavLink>
-        </div>
+
+        <!-- TODO EL MENÚ SE OCULTA SI NO HAY SESIÓN INICIADA -->
+        <AuthorizeView>
+            <Authorized>
+
+                <!-- 1. LECTORES (Roles 3 y 4) -->
+                <AuthorizeView Roles="3, 4" Context="lectorContext">
+                    <Authorized>
+                        <div class="nav-item px-3">
+                            <NavLink class="nav-link" href="catalogo-libros">
+                                <span class="bi bi-book-half" aria-hidden="true"></span> Catálogo de Libros
+                            </NavLink>
+                        </div>
+                        <div class="nav-item px-3">
+                            <NavLink class="nav-link" href="mis-prestamos">
+                                <span class="bi bi-arrow-left-right" aria-hidden="true"></span> Mis Préstamos
+                            </NavLink>
+                        </div>
+                    </Authorized>
+                </AuthorizeView>
+
+                <!-- 2. ADMIN Y BIBLIOTECARIO (Roles 1 y 2) -->
+                <AuthorizeView Roles="1, 2" Context="adminContext">
+                    <Authorized>
+                        <div class="nav-item px-3">
+                            <NavLink class="nav-link" href="libros">
+                                <span class="bi bi-book-half" aria-hidden="true"></span> Gestión de Libros
+                            </NavLink>
+                        </div>
+                        <div class="nav-item px-3">
+                            <NavLink class="nav-link" href="prestamos">
+                                <span class="bi bi-arrow-left-right" aria-hidden="true"></span> Gestión de Préstamos
+                            </NavLink>
+                        </div>
+                        <div class="nav-item px-3">
+                            <NavLink class="nav-link" href="autores">
+                                <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> Autores
+                            </NavLink>
+                        </div>
+                        <div class="nav-item px-3">
+                            <NavLink class="nav-link" href="lectores">
+                                <span class="bi bi-people-fill" aria-hidden="true"></span> Lectores
+                            </NavLink>
+                        </div>
+                        <div class="nav-item px-3">
+                            <NavLink class="nav-link" href="maestro-detalle-lectores">
+                                <span class="bi bi-card-list" aria-hidden="true"></span> Historial Lectores
+                            </NavLink>
+                        </div>
+                        <div class="nav-item px-3">
+                            <NavLink class="nav-link" href="reporte-prestamos">
+                                <span class="bi bi-file-earmark-bar-graph" aria-hidden="true"></span> Reporte Vista SQL
+                            </NavLink>
+                        </div>
+                    </Authorized>
+                </AuthorizeView>
+
+                <!-- 3. SOLO ADMIN (Rol 1) -->
+                <AuthorizeView Roles="1" Context="soloAdminContext">
+                    <Authorized>
+                        <div class="nav-item px-3">
+                            <NavLink class="nav-link" href="empleados">
+                                <span class="bi bi-briefcase-fill" aria-hidden="true"></span> Empleados
+                            </NavLink>
+                        </div>
+                    </Authorized>
+                </AuthorizeView>
+
+            </Authorized>
+        </AuthorizeView>
+
     </nav>
 </div>
 
 @code {
     private bool collapseNavMenu = true;
-
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
-
-    private void ToggleNavMenu()
-    {
-        collapseNavMenu = !collapseNavMenu;
-    }
+    private void ToggleNavMenu() => collapseNavMenu = !collapseNavMenu;
 }
