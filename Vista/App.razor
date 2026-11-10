@@ -3,10 +3,19 @@
         <Found Context="routeData">
             <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
                 <NotAuthorized>
-                    <div class="alert alert-danger m-4">
-                        <h4>Acceso Denegado</h4>
-                        <p>No tienes los permisos necesarios para ver este módulo.</p>
-                    </div>
+                    @if (context.User.Identity?.IsAuthenticated == true)
+                    {
+                        @* Si inició sesión pero no tiene el ROL adecuado, muestra el error rojo *@
+                        <div class="alert alert-danger m-4">
+                            <h4>Acceso Denegado</h4>
+                            <p>No tienes los permisos necesarios para ver este módulo.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        @* Si NO ha iniciado sesión, lo redirige al login sin mostrar errores *@
+                        <RedirectToLogin />
+                    }
                 </NotAuthorized>
                 <Authorizing>
                     <p>Verificando permisos...</p>
@@ -17,7 +26,7 @@
         <NotFound>
             <PageTitle>Not found</PageTitle>
             <LayoutView Layout="@typeof(MainLayout)">
-                <p role="alert">Sorry, there's nothing at this address.</p>
+                <p role="alert">Lo sentimos, no hay nada en esta dirección.</p>
             </LayoutView>
         </NotFound>
     </Router>

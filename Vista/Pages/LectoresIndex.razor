@@ -13,7 +13,7 @@
 
 @if (mostrarAlerta)
 {
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
+    <div class="alert @claseAlerta alert-dismissible fade show" role="alert">
         @mensajeAlerta
         <button type="button" class="btn-close" @onclick="() => mostrarAlerta = false"></button>
     </div>
@@ -95,13 +95,16 @@ else
 
                         <div class="mb-3">
                             <label class="form-label">Usuario:</label>
-                            <InputText class="form-control" @bind-Value="lectorActual.Usuario" required />
+                            <InputText class="form-control" @bind-Value="lectorActual.Usuario" disabled="@isEditing" required />
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Clave:</label>
-                            <InputText type="password" class="form-control" @bind-Value="lectorActual.Clave" required />
-                        </div>
+                        @if (!isEditing)
+                        {
+                            <div class="mb-3">
+                                <label class="form-label">Clave:</label>
+                                <InputText type="password" class="form-control" @bind-Value="lectorActual.Clave" required />
+                            </div>
+                        }
 
                         <div class="d-flex justify-content-end mt-3">
                             <button type="submit" class="btn btn-success me-2">Guardar</button>
@@ -121,6 +124,7 @@ else
     private bool isEditing = false;
     private string? mensajeAlerta;
     private bool mostrarAlerta = false;
+    private string claseAlerta = "alert-success";
 
     protected override async Task OnInitializedAsync()
     {
@@ -138,6 +142,7 @@ else
         lectorActual = new Lectore();
         isEditing = false;
         mostrarFormulario = true;
+        mostrarAlerta = false;
     }
 
     private void EditarLector(Lectore lector)
@@ -154,6 +159,7 @@ else
         };
         isEditing = true;
         mostrarFormulario = true;
+        mostrarAlerta = false;
     }
 
     private async Task GuardarLector()
@@ -171,24 +177,52 @@ else
         var url1 = "api/lectores";
         var url2 = $"api/lectores/{lectorActual.Idlector}";
 
-        if (!isEditing)
-            await Repositorio.PostAsync(url1, lectorActual);
-        else
-            await Repositorio.PutAsync(url2, lectorActual);
+        try
+        {
+            if (!isEditing)
+                await Repositorio.PostAsync(url1, lectorActual);
+            else
+                await Repositorio.PutAsync(url2, lectorActual);
 
-        await CargarLectores();
-        mostrarFormulario = false;
-        mensajeAlerta = "Lector guardado exitosamente.";
-        mostrarAlerta = true;
+            await CargarLectores();
+            mostrarFormulario = false;
+            
+            claseAlerta = "alert-success";
+            mensajeAlerta = "Lector guardado exitosamente.";
+            mostrarAlerta = true;
+        }
+        catch (Exception ex)
+        {
+            string mensaje = ex.Message;
+            if (mensaje.Contains("existe") || mensaje.Contains("BadRequest") || mensaje.Contains("400"))
+            {
+                mensaje = "Error: El usuario o documento ya existe en el sistema.";
+            }
+
+            claseAlerta = "alert-danger";
+            mensajeAlerta = mensaje;
+            mostrarAlerta = true;
+        }
     }
 
     private async Task EliminarLector(int id)
     {
-        var url2 = $"api/lectores/{id}";
-        await Repositorio.DeleteAsync(url2);
-        await CargarLectores();
-        mensajeAlerta = "Lector eliminado exitosamente.";
-        mostrarAlerta = true;
+        try
+        {
+            var url2 = $"api/lectores/{id}";
+            await Repositorio.DeleteAsync(url2);
+            await CargarLectores();
+            
+            claseAlerta = "alert-success";
+            mensajeAlerta = "Lector eliminado exitosamente.";
+            mostrarAlerta = true;
+        }
+        catch (Exception ex)
+        {
+            claseAlerta = "alert-danger";
+            mensajeAlerta = "Error al eliminar el lector: " + ex.Message;
+            mostrarAlerta = true;
+        }
     }
 
     private void Cancelar()

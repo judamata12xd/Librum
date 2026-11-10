@@ -13,13 +13,13 @@
 
 @if (mostrarAlerta)
 {
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
+    <div class="alert @claseAlerta alert-dismissible fade show" role="alert" style="z-index: 1050;">
         @mensajeAlerta
         <button type="button" class="btn-close" @onclick="() => mostrarAlerta = false"></button>
     </div>
 }
 
-@if (prestamos == null || libros == null || lectores == null)
+@if (prestamos == null || libros == null || lectores == null || empleados == null)
 {
     <div class="text-center">
         <div class="spinner-border text-primary" role="status"></div>
@@ -48,15 +48,12 @@ else
         <tbody>
             @foreach (var prestamo in prestamos)
             {
-              
                 var libroEncontrado = libros.FirstOrDefault(l => l.Codlibro == prestamo.Codlibro);
                 string nombreLibro = libroEncontrado?.Nombre ?? $"Libro #{prestamo.Codlibro}";
 
-                
                 var lectorEncontrado = lectores.FirstOrDefault(l => l.Idlector == prestamo.Idlector);
                 string nombreLector = lectorEncontrado?.Nombre ?? $"Lector #{prestamo.Idlector}";
 
-             
                 bool tieneMulta = prestamo.Estado == "A" && prestamo.FechaDevolucionE < DateTime.Now;
                 decimal valorMulta = 0;
                 if (tieneMulta)
@@ -120,33 +117,52 @@ else
                     <button type="button" class="btn-close" @onclick="Cancelar"></button>
                 </div>
                 <div class="modal-body">
-                    <EditForm Model="prestamoActual" OnValidSubmit="GuardarPrestamo">
+                    <!-- Cambiado de EditForm a un formulario estándar para evitar errores de tipo -->
+                    <form @onsubmit="GuardarPrestamo">
 
                         <div class="mb-3">
                             <label class="form-label">Código del Libro:</label>
-                            <InputNumber class="form-control" @bind-Value="prestamoActual.Codlibro" required />
+                            <input type="number" list="listaLibrosData" class="form-control" @bind="codLibroInput" placeholder="Escriba o escanee el código..." required />
+                            <datalist id="listaLibrosData">
+                                @foreach (var libro in libros)
+                                {
+                                    <option value="@libro.Codlibro">@libro.Nombre (Disponibles: @libro.Disponible)</option>
+                                }
+                            </datalist>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">ID del Lector:</label>
-                            <InputNumber class="form-control" @bind-Value="prestamoActual.Idlector" required />
+                            <label class="form-label">Documento del Lector:</label>
+                            <input type="text" list="listaLectoresData" class="form-control" @bind="docLectorInput" placeholder="Escriba el documento..." required />
+                            <datalist id="listaLectoresData">
+                                @foreach (var lector in lectores)
+                                {
+                                    <option value="@lector.Documento">@lector.Nombre</option>
+                                }
+                            </datalist>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">ID del Empleado (Quien presta):</label>
-                            <InputNumber class="form-control" @bind-Value="prestamoActual.IdEmpleado" required />
+                            <label class="form-label">Documento del Empleado:</label>
+                            <input type="text" list="listaEmpleadosData" class="form-control" @bind="docEmpleadoInput" placeholder="Escriba el documento..." required />
+                            <datalist id="listaEmpleadosData">
+                                @foreach (var empleado in empleados)
+                                {
+                                    <option value="@empleado.Documento">@empleado.Nombre</option>
+                                }
+                            </datalist>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Fecha de Devolución Esperada:</label>
-                            <InputDate class="form-control" @bind-Value="prestamoActual.FechaDevolucionE" required />
+                            <input type="date" class="form-control" @bind="prestamoActual.FechaDevolucionE" required />
                         </div>
 
                         <div class="d-flex justify-content-end mt-3">
                             <button type="submit" class="btn btn-success me-2">Prestar</button>
                             <button type="button" class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
                         </div>
-                    </EditForm>
+                    </form>
                 </div>
             </div>
         </div>
@@ -157,10 +173,17 @@ else
     private List<Prestamo>? prestamos;
     private List<Libro>? libros;
     private List<Lectore>? lectores;
+    private List<Empleado>? empleados;
+    
     private Prestamo prestamoActual = new();
     private bool mostrarFormulario = false;
     private string? mensajeAlerta;
     private bool mostrarAlerta = false;
+    private string claseAlerta = "alert-success";
+
+    private int codLibroInput;
+    private string docLectorInput = "";
+    private string docEmpleadoInput = "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -174,17 +197,23 @@ else
             libros = await Repositorio.GetAsync<List<Libro>>("api/Libros") ?? new List<Libro>();
             lectores = await Repositorio.GetAsync<List<Lectore>>("api/lectores") ?? new List<Lectore>();
             prestamos = await Repositorio.GetAsync<List<Prestamo>>("api/Prestamos") ?? new List<Prestamo>();
+            empleados = await Repositorio.GetAsync<List<Empleado>>("api/Empleados") ?? new List<Empleado>();
         }
         catch (Exception)
         {
             libros = new List<Libro>();
             lectores = new List<Lectore>();
             prestamos = new List<Prestamo>();
+            empleados = new List<Empleado>();
         }
     }
 
     private void MostrarFormulario()
     {
+        codLibroInput = 0;
+        docLectorInput = "";
+        docEmpleadoInput = "";
+        
         prestamoActual = new Prestamo
         {
             FechaPrestamo = DateTime.Now,
@@ -192,29 +221,111 @@ else
             Estado = "A"
         };
         mostrarFormulario = true;
+        mostrarAlerta = false;
     }
 
     private async Task GuardarPrestamo()
     {
-        var url = "api/Prestamos";
-        await Repositorio.PostAsync(url, prestamoActual);
+        // 1. Buscar entidades localmente
+        var libroEncontrado = libros.FirstOrDefault(l => l.Codlibro == codLibroInput);
+        var lectorEncontrado = lectores.FirstOrDefault(l => l.Documento?.ToString() == docLectorInput);
+        var empleadoEncontrado = empleados.FirstOrDefault(e => e.Documento?.ToString() == docEmpleadoInput);
 
-        await CargarDatos();
-        mostrarFormulario = false;
-        mensajeAlerta = "Préstamo registrado exitosamente.";
-        mostrarAlerta = true;
+        if (libroEncontrado == null || lectorEncontrado == null || empleadoEncontrado == null)
+        {
+            MostrarError("Error: El libro, lector o empleado ingresado no existe.");
+            return;
+        }
+
+        // 🔴 REGLA 2: Validar si el libro tiene unidades disponibles (disponibilidad <= 0)
+        if (libroEncontrado.Disponible <= 0)
+        {
+            MostrarError("Error: Ya no quedan unidades disponibles de este libro para préstamo.");
+            return;
+        }
+
+        // 🔴 REGLA 3: Validar si el lector tiene multas o préstamos vencidos activos
+        bool lectorConMulta = prestamos.Any(p =>
+            p.Idlector == lectorEncontrado.Idlector &&
+            p.Estado == "A" &&
+            p.FechaDevolucionE < DateTime.Now);
+
+        if (lectorConMulta)
+        {
+            MostrarError("Este usuario tiene multa y no puede realizar préstamos.");
+            return;
+        }
+
+        // 🔴 REGLA 1: Validar si el lector ya tiene un ejemplar de este mismo libro activo
+        bool yaTieneElLibro = prestamos.Any(p =>
+            p.Idlector == lectorEncontrado.Idlector &&
+            p.Codlibro == libroEncontrado.Codlibro &&
+            p.Estado == "A");
+
+        if (yaTieneElLibro)
+        {
+            MostrarError("Error: El lector ya tiene un ejemplar de este libro sin devolver.");
+            return;
+        }
+
+        // Asignar IDs
+        prestamoActual.Codlibro = libroEncontrado.Codlibro;
+        prestamoActual.Idlector = lectorEncontrado.Idlector;
+        prestamoActual.IdEmpleado = empleadoEncontrado.IdEmpleado;
+
+        try
+        {
+            var url = "api/Prestamos";
+            await Repositorio.PostAsync(url, prestamoActual);
+
+            await CargarDatos();
+            mostrarFormulario = false;
+            
+            claseAlerta = "alert-success";
+            mensajeAlerta = "Préstamo registrado exitosamente.";
+            mostrarAlerta = true;
+        }
+        catch (Exception ex)
+        {
+            string mensajeLimpio = ex.Message;
+            if (mensajeLimpio.Contains("50001") || mensajeLimpio.Contains("inventario"))
+            {
+                mensajeLimpio = "Error: Ya no quedan unidades disponibles de este libro.";
+            }
+            else if (mensajeLimpio.Contains("50002") || mensajeLimpio.Contains("sin devolver"))
+            {
+                mensajeLimpio = "Error: El lector ya tiene un ejemplar de este libro sin devolver.";
+            }
+
+            MostrarError(mensajeLimpio);
+        }
     }
 
     private async Task ReintegrarLibro(Prestamo prestamo)
     {
-        prestamo.Estado = "R";
-        prestamo.FechaDevolucionR = DateTime.Now;
+        try
+        {
+            prestamo.Estado = "R";
+            prestamo.FechaDevolucionR = DateTime.Now;
 
-        var url = $"api/Prestamos/{prestamo.IdPrestamo}";
-        await Repositorio.PutAsync(url, prestamo);
+            var url = $"api/Prestamos/{prestamo.IdPrestamo}";
+            await Repositorio.PutAsync(url, prestamo);
 
-        await CargarDatos();
-        mensajeAlerta = "Libro reintegrado exitosamente.";
+            await CargarDatos();
+            claseAlerta = "alert-success";
+            mensajeAlerta = "Libro reintegrado exitosamente.";
+            mostrarAlerta = true;
+        }
+        catch (Exception ex)
+        {
+            MostrarError(ex.Message);
+        }
+    }
+
+    private void MostrarError(string mensaje)
+    {
+        claseAlerta = "alert-danger";
+        mensajeAlerta = mensaje;
         mostrarAlerta = true;
     }
 

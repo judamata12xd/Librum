@@ -36,10 +36,18 @@ namespace Controlador.Controllers
             return lector;
         }
 
+
+
         // POST: api/Lectores
         [HttpPost]
         public async Task<ActionResult<Lectore>> PostLector(Lectore lector)
         {
+            bool existe = await _context.Lectores.AnyAsync(l => l.Documento == lector.Documento);
+            if (existe)
+            {
+                return BadRequest("El usuario o documento ya existe en el sistema.");
+            }
+
             _context.Lectores.Add(lector);
             await _context.SaveChangesAsync();
 
