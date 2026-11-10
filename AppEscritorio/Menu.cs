@@ -26,5 +26,10 @@ namespace AppEscritorio
         {
 
         }
+
+        private void gbMenu_Enter(object sender, EventArgs e)
+        {
+
+        }
     }
 }
