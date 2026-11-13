@@ -18,13 +18,13 @@
                 <AuthorizeView Roles="3, 4" Context="lectorContext">
                     <Authorized>
                         <div class="nav-item px-3">
-                            <NavLink class="nav-link" href="catalogo-libros">
-                                <span class="bi bi-book-half" aria-hidden="true"></span> Catálogo de Libros
+                            <NavLink class="nav-link d-flex align-items-center" href="catalogo-libros">
+                                <i class="bi bi-journal-album fs-5 me-2 mb-1" aria-hidden="true"></i> <span>Catálogo de Libros</span>
                             </NavLink>
                         </div>
                         <div class="nav-item px-3">
-                            <NavLink class="nav-link" href="mis-prestamos">
-                                <span class="bi bi-arrow-left-right" aria-hidden="true"></span> Mis Préstamos
+                            <NavLink class="nav-link d-flex align-items-center" href="mis-prestamos">
+                                <i class="bi bi-bookmark-check-fill fs-5 me-2 mb-1" aria-hidden="true"></i> <span>Mis Préstamos</span>
                             </NavLink>
                         </div>
                     </Authorized>
@@ -34,33 +34,33 @@
                 <AuthorizeView Roles="1, 2" Context="adminContext">
                     <Authorized>
                         <div class="nav-item px-3">
-                            <NavLink class="nav-link" href="libros">
-                                <span class="bi bi-book-half" aria-hidden="true"></span> Gestión de Libros
+                            <NavLink class="nav-link d-flex align-items-center" href="libros">
+                                <i class="bi bi-journal-text fs-5 me-2 mb-1" aria-hidden="true"></i> <span>Gestión de Libros</span>
                             </NavLink>
                         </div>
                         <div class="nav-item px-3">
-                            <NavLink class="nav-link" href="prestamos">
-                                <span class="bi bi-arrow-left-right" aria-hidden="true"></span> Gestión de Préstamos
+                            <NavLink class="nav-link d-flex align-items-center" href="prestamos">
+                                <i class="bi bi-journal-check fs-5 me-2 mb-1" aria-hidden="true"></i> <span>Gestión de Préstamos</span>
                             </NavLink>
                         </div>
                         <div class="nav-item px-3">
-                            <NavLink class="nav-link" href="autores">
-                                <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> Autores
+                            <NavLink class="nav-link d-flex align-items-center" href="autores">
+                                <i class="bi bi-person-badge-fill fs-5 me-2 mb-1" aria-hidden="true"></i> <span>Autores</span>
                             </NavLink>
                         </div>
                         <div class="nav-item px-3">
-                            <NavLink class="nav-link" href="lectores">
-                                <span class="bi bi-people-fill" aria-hidden="true"></span> Lectores
+                            <NavLink class="nav-link d-flex align-items-center" href="lectores">
+                                <i class="bi bi-people-fill fs-5 me-2 mb-1" aria-hidden="true"></i> <span>Lectores</span>
                             </NavLink>
                         </div>
                         <div class="nav-item px-3">
-                            <NavLink class="nav-link" href="maestro-detalle-lectores">
-                                <span class="bi bi-card-list" aria-hidden="true"></span> Historial Lectores
+                            <NavLink class="nav-link d-flex align-items-center" href="maestro-detalle-lectores">
+                                <i class="bi bi-clock-history fs-5 me-2 mb-1" aria-hidden="true"></i> <span>Historial Lectores</span>
                             </NavLink>
                         </div>
                         <div class="nav-item px-3">
-                            <NavLink class="nav-link" href="reporte-prestamos">
-                                <span class="bi bi-file-earmark-bar-graph" aria-hidden="true"></span> Reporte Vista SQL
+                            <NavLink class="nav-link d-flex align-items-center" href="reporte-prestamos">
+                                <i class="bi bi-table fs-5 me-2 mb-1" aria-hidden="true"></i> <span>Reporte Vista SQL</span>
                             </NavLink>
                         </div>
                     </Authorized>
@@ -70,8 +70,8 @@
                 <AuthorizeView Roles="1" Context="soloAdminContext">
                     <Authorized>
                         <div class="nav-item px-3">
-                            <NavLink class="nav-link" href="empleados">
-                                <span class="bi bi-briefcase-fill" aria-hidden="true"></span> Empleados
+                            <NavLink class="nav-link d-flex align-items-center" href="empleados">
+                                <i class="bi bi-person-workspace fs-5 me-2 mb-1" aria-hidden="true"></i> <span>Empleados</span>
                             </NavLink>
                         </div>
                     </Authorized>

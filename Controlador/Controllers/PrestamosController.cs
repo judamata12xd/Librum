@@ -17,34 +17,87 @@ namespace Controlador.Controllers
 
         // GET: api/Prestamos
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Prestamo>>> GetPrestamos()
+        public async Task<ActionResult<IEnumerable<object>>> GetPrestamos()
         {
-            return await _context.Prestamos.ToListAsync();
+            var listaPrestamos = await _context.Prestamos
+                .Include(p => p.CodlibroNavigation)
+                .Include(p => p.IdlectorNavigation)
+                .Select(p => new
+                {
+                    idPrestamo = p.IdPrestamo,
+                    fechaPrestamo = p.FechaPrestamo,
+                    fechaDevolucionE = p.FechaDevolucionE,
+                    fechaDevolucionR = p.FechaDevolucionR,
+                    estado = p.Estado,
+                    codlibro = p.Codlibro,
+                    nombreLibro = p.CodlibroNavigation != null ? p.CodlibroNavigation.Nombre : "Sin Nombre",
+                    idlector = p.Idlector,
+                    nombreLector = p.IdlectorNavigation != null ? p.IdlectorNavigation.Nombre : "Sin Lector",
+                    idEmpleado = p.IdEmpleado,
+                    multa = p.Multa
+                })
+                .ToListAsync();
+
+            return Ok(listaPrestamos);
         }
 
         // GET: api/Prestamos/lector/5
         [HttpGet("lector/{idlector}")]
-        public async Task<ActionResult<IEnumerable<Prestamo>>> GetPrestamosPorLector(int idlector)
+        public async Task<ActionResult<IEnumerable<object>>> GetPrestamosPorLector(int idlector)
         {
-            // Busca en la tabla de préstamos únicamente los que le pertenecen a este lector
             var prestamosDelLector = await _context.Prestamos
-                                                   .Where(p => p.Idlector == idlector)
-                                                   .ToListAsync();
+                .Where(p => p.Idlector == idlector)
+                .Include(p => p.CodlibroNavigation)
+                .Include(p => p.IdlectorNavigation)
+                .Select(p => new
+                {
+                    idPrestamo = p.IdPrestamo,
+                    fechaPrestamo = p.FechaPrestamo,
+                    fechaDevolucionE = p.FechaDevolucionE,
+                    fechaDevolucionR = p.FechaDevolucionR,
+                    estado = p.Estado,
+                    codlibro = p.Codlibro,
+                    nombreLibro = p.CodlibroNavigation != null ? p.CodlibroNavigation.Nombre : "Sin Nombre",
+                    idlector = p.Idlector,
+                    nombreLector = p.IdlectorNavigation != null ? p.IdlectorNavigation.Nombre : "Sin Lector",
+                    idEmpleado = p.IdEmpleado,
+                    multa = p.Multa
+                })
+                .ToListAsync();
+
             return Ok(prestamosDelLector);
         }
 
         // GET: api/Prestamos/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Prestamo>> GetPrestamo(int id)
+        public async Task<ActionResult<object>> GetPrestamo(int id)
         {
-            var prestamo = await _context.Prestamos.FindAsync(id);
+            var p = await _context.Prestamos
+                .Include(p => p.CodlibroNavigation)
+                .Include(p => p.IdlectorNavigation)
+                .Where(x => x.IdPrestamo == id)
+                .Select(p => new
+                {
+                    idPrestamo = p.IdPrestamo,
+                    fechaPrestamo = p.FechaPrestamo,
+                    fechaDevolucionE = p.FechaDevolucionE,
+                    fechaDevolucionR = p.FechaDevolucionR,
+                    estado = p.Estado,
+                    codlibro = p.Codlibro,
+                    nombreLibro = p.CodlibroNavigation != null ? p.CodlibroNavigation.Nombre : "Sin Nombre",
+                    idlector = p.Idlector,
+                    nombreLector = p.IdlectorNavigation != null ? p.IdlectorNavigation.Nombre : "Sin Lector",
+                    idEmpleado = p.IdEmpleado,
+                    multa = p.Multa
+                })
+                .FirstOrDefaultAsync();
 
-            if (prestamo == null)
+            if (p == null)
             {
                 return NotFound();
             }
 
-            return prestamo;
+            return p;
         }
 
         // POST: api/Prestamos
@@ -53,7 +106,6 @@ namespace Controlador.Controllers
         {
             try
             {
-           
                 int diasPrestamo = (prestamo.FechaDevolucionE - DateTime.Now).Days;
                 if (diasPrestamo <= 0) diasPrestamo = 1;
 
@@ -65,7 +117,6 @@ namespace Controlador.Controllers
             }
             catch (Exception ex)
             {
-                
                 return BadRequest(ex.InnerException?.Message ?? ex.Message);
             }
         }
@@ -79,12 +130,10 @@ namespace Controlador.Controllers
                 return BadRequest();
             }
 
-           
             if (prestamo.Estado == "R")
             {
                 try
                 {
-             
                     await _context.Database.ExecuteSqlRawAsync(
                         "EXEC sp_ReintegrarLibro @p0",
                         id);

@@ -31,10 +31,6 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Menu));
             this.busquedaLibrosToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.verPrestamosToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.ingresarPrestamoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.ingresarLibrosToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.eliminarLibroToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.modificarLibroToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.prestamoDeLibroToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.prestamoDeLibrosToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.reinToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -43,9 +39,9 @@
             this.salirToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.gbMenu = new System.Windows.Forms.GroupBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
             this.menuStrip1.SuspendLayout();
             this.gbMenu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -56,41 +52,13 @@
             this.busquedaLibrosToolStripMenuItem.Name = "busquedaLibrosToolStripMenuItem";
             this.busquedaLibrosToolStripMenuItem.Size = new System.Drawing.Size(103, 20);
             this.busquedaLibrosToolStripMenuItem.Text = "Busqueda libros";
+            this.busquedaLibrosToolStripMenuItem.Click += new System.EventHandler(this.busquedaLibrosToolStripMenuItem_Click);
             // 
             // verPrestamosToolStripMenuItem
             // 
             this.verPrestamosToolStripMenuItem.Name = "verPrestamosToolStripMenuItem";
             this.verPrestamosToolStripMenuItem.Size = new System.Drawing.Size(92, 20);
             this.verPrestamosToolStripMenuItem.Text = "Ver prestamos";
-            // 
-            // ingresarPrestamoToolStripMenuItem
-            // 
-            this.ingresarPrestamoToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.ingresarLibrosToolStripMenuItem,
-            this.eliminarLibroToolStripMenuItem,
-            this.modificarLibroToolStripMenuItem});
-            this.ingresarPrestamoToolStripMenuItem.Name = "ingresarPrestamoToolStripMenuItem";
-            this.ingresarPrestamoToolStripMenuItem.Size = new System.Drawing.Size(136, 20);
-            this.ingresarPrestamoToolStripMenuItem.Text = "Actualizacion de libros";
-            this.ingresarPrestamoToolStripMenuItem.Click += new System.EventHandler(this.ingresarPrestamoToolStripMenuItem_Click);
-            // 
-            // ingresarLibrosToolStripMenuItem
-            // 
-            this.ingresarLibrosToolStripMenuItem.Name = "ingresarLibrosToolStripMenuItem";
-            this.ingresarLibrosToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
-            this.ingresarLibrosToolStripMenuItem.Text = "Ingresar libros";
-            // 
-            // eliminarLibroToolStripMenuItem
-            // 
-            this.eliminarLibroToolStripMenuItem.Name = "eliminarLibroToolStripMenuItem";
-            this.eliminarLibroToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
-            this.eliminarLibroToolStripMenuItem.Text = "Eliminar libro";
-            // 
-            // modificarLibroToolStripMenuItem
-            // 
-            this.modificarLibroToolStripMenuItem.Name = "modificarLibroToolStripMenuItem";
-            this.modificarLibroToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
-            this.modificarLibroToolStripMenuItem.Text = "modificar libro";
             // 
             // prestamoDeLibroToolStripMenuItem
             // 
@@ -100,6 +68,7 @@
             this.prestamoDeLibroToolStripMenuItem.Name = "prestamoDeLibroToolStripMenuItem";
             this.prestamoDeLibroToolStripMenuItem.Size = new System.Drawing.Size(126, 20);
             this.prestamoDeLibroToolStripMenuItem.Text = "Gestor de prestamos";
+            this.prestamoDeLibroToolStripMenuItem.Click += new System.EventHandler(this.prestamoDeLibroToolStripMenuItem_Click);
             // 
             // prestamoDeLibrosToolStripMenuItem
             // 
@@ -138,7 +107,6 @@
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.busquedaLibrosToolStripMenuItem,
             this.verPrestamosToolStripMenuItem,
-            this.ingresarPrestamoToolStripMenuItem,
             this.prestamoDeLibroToolStripMenuItem,
             this.reintegrarLibroToolStripMenuItem,
             this.salirToolStripMenuItem,
@@ -163,16 +131,15 @@
             this.gbMenu.Text = "groupBox1";
             this.gbMenu.Enter += new System.EventHandler(this.gbMenu_Enter);
             // 
-            // label1
+            // pictureBox1
             // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Microsoft YaHei", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.label1.Location = new System.Drawing.Point(267, 218);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(112, 31);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "LIBRUM";
+            this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
+            this.pictureBox1.Location = new System.Drawing.Point(273, 153);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(100, 50);
+            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureBox1.TabIndex = 2;
+            this.pictureBox1.TabStop = false;
             // 
             // label2
             // 
@@ -185,15 +152,16 @@
             this.label2.TabIndex = 1;
             this.label2.Text = "Selecciona una opción del menú superior para comenzar.";
             // 
-            // pictureBox1
+            // label1
             // 
-            this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
-            this.pictureBox1.Location = new System.Drawing.Point(273, 153);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(100, 50);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pictureBox1.TabIndex = 2;
-            this.pictureBox1.TabStop = false;
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Microsoft YaHei", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.ForeColor = System.Drawing.SystemColors.ButtonFace;
+            this.label1.Location = new System.Drawing.Point(267, 218);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(112, 31);
+            this.label1.TabIndex = 0;
+            this.label1.Text = "LIBRUM";
             // 
             // Menu
             // 
@@ -222,10 +190,6 @@
 
         private System.Windows.Forms.ToolStripMenuItem busquedaLibrosToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem verPrestamosToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem ingresarPrestamoToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem ingresarLibrosToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem eliminarLibroToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem modificarLibroToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem prestamoDeLibroToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem prestamoDeLibrosToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem reinToolStripMenuItem;

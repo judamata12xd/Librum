@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 
 namespace Modelo.Entidades;
 
+[Keyless]
 public partial class VwHistorialPrestamo
 {
     public string DocumentoLector { get; set; } = null!;

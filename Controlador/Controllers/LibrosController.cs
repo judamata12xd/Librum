@@ -19,7 +19,18 @@ namespace Controlador.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Libro>>> GetLibros()
         {
-            return await _context.Libros.ToListAsync();
+            var listaLibros = await (from l in _context.Libros
+                                     join a in _context.Autores on l.Idautor equals a.Idautor
+                                     select new
+                                     {
+                                         Codlibro = l.Codlibro,
+                                         Nombre = l.Nombre,
+                                         Disponible = l.Disponible,
+                                         Idautor = l.Idautor,
+                                         NombreAutor = a.Nombre
+                                     }).ToListAsync();
+
+            return Ok(listaLibros);
         }
 
         // GET: api/Libros/5 (Obtener un libro por ID)
