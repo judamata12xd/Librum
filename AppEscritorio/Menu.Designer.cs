@@ -30,12 +30,8 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Menu));
             this.busquedaLibrosToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.verPrestamosToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.prestamoDeLibroToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.prestamoDeLibrosToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.reinToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.reintegrarLibroToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.salirToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.salirToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.gbMenu = new System.Windows.Forms.GroupBox();
@@ -54,33 +50,12 @@
             this.busquedaLibrosToolStripMenuItem.Text = "Busqueda libros";
             this.busquedaLibrosToolStripMenuItem.Click += new System.EventHandler(this.busquedaLibrosToolStripMenuItem_Click);
             // 
-            // verPrestamosToolStripMenuItem
-            // 
-            this.verPrestamosToolStripMenuItem.Name = "verPrestamosToolStripMenuItem";
-            this.verPrestamosToolStripMenuItem.Size = new System.Drawing.Size(92, 20);
-            this.verPrestamosToolStripMenuItem.Text = "Ver prestamos";
-            // 
             // prestamoDeLibroToolStripMenuItem
             // 
-            this.prestamoDeLibroToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.prestamoDeLibrosToolStripMenuItem,
-            this.reinToolStripMenuItem});
             this.prestamoDeLibroToolStripMenuItem.Name = "prestamoDeLibroToolStripMenuItem";
             this.prestamoDeLibroToolStripMenuItem.Size = new System.Drawing.Size(126, 20);
             this.prestamoDeLibroToolStripMenuItem.Text = "Gestor de prestamos";
             this.prestamoDeLibroToolStripMenuItem.Click += new System.EventHandler(this.prestamoDeLibroToolStripMenuItem_Click);
-            // 
-            // prestamoDeLibrosToolStripMenuItem
-            // 
-            this.prestamoDeLibrosToolStripMenuItem.Name = "prestamoDeLibrosToolStripMenuItem";
-            this.prestamoDeLibrosToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.prestamoDeLibrosToolStripMenuItem.Text = "Prestamo de libros";
-            // 
-            // reinToolStripMenuItem
-            // 
-            this.reinToolStripMenuItem.Name = "reinToolStripMenuItem";
-            this.reinToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.reinToolStripMenuItem.Text = "Reintegrar libro";
             // 
             // reintegrarLibroToolStripMenuItem
             // 
@@ -89,27 +64,20 @@
             this.reintegrarLibroToolStripMenuItem.Text = "Vista";
             this.reintegrarLibroToolStripMenuItem.Click += new System.EventHandler(this.reintegrarLibroToolStripMenuItem_Click);
             // 
-            // salirToolStripMenuItem
-            // 
-            this.salirToolStripMenuItem.Name = "salirToolStripMenuItem";
-            this.salirToolStripMenuItem.Size = new System.Drawing.Size(107, 20);
-            this.salirToolStripMenuItem.Text = "Detalle pretamos";
-            // 
             // salirToolStripMenuItem1
             // 
             this.salirToolStripMenuItem1.Name = "salirToolStripMenuItem1";
             this.salirToolStripMenuItem1.Size = new System.Drawing.Size(41, 20);
             this.salirToolStripMenuItem1.Text = "Salir";
+            this.salirToolStripMenuItem1.Click += new System.EventHandler(this.salirToolStripMenuItem1_Click);
             // 
             // menuStrip1
             // 
             this.menuStrip1.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.busquedaLibrosToolStripMenuItem,
-            this.verPrestamosToolStripMenuItem,
             this.prestamoDeLibroToolStripMenuItem,
             this.reintegrarLibroToolStripMenuItem,
-            this.salirToolStripMenuItem,
             this.salirToolStripMenuItem1});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
@@ -189,12 +157,8 @@
         #endregion
 
         private System.Windows.Forms.ToolStripMenuItem busquedaLibrosToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem verPrestamosToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem prestamoDeLibroToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem prestamoDeLibrosToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem reinToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem reintegrarLibroToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem salirToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem salirToolStripMenuItem1;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.GroupBox gbMenu;

@@ -44,5 +44,10 @@ namespace AppEscritorio
             GestionPrestamos formBusqueda = new GestionPrestamos();
             formBusqueda.ShowDialog();
         }
+
+        private void salirToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
     }
 }
