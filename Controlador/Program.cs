@@ -6,8 +6,11 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// 1. Protección: Si Azure no tiene las variables JWT, usamos unas de respaldo
 var jwtSettings = builder.Configuration.GetSection("Jwt");
-var secretKey = jwtSettings.GetValue<string>("Key");
+var secretKey = jwtSettings.GetValue<string>("Key") ?? "SuperClaveSecretaDeRespaldoParaQueNoFalle123!";
+var validIssuer = jwtSettings.GetValue<string>("Issuer") ?? "ApiLibrum";
+var validAudience = jwtSettings.GetValue<string>("Audience") ?? "ApiLibrum";
 
 builder.Services.AddAuthentication(options =>
 {
@@ -23,9 +26,9 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
         ValidateIssuer = true,
-        ValidIssuer = jwtSettings.GetValue<string>("Issuer"),
+        ValidIssuer = validIssuer,
         ValidateAudience = true,
-        ValidAudience = jwtSettings.GetValue<string>("Audience"),
+        ValidAudience = validAudience,
         ValidateLifetime = true,
         ClockSkew = TimeSpan.Zero
     };
@@ -34,8 +37,11 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddControllers();
 builder.Services.AddSwaggerGen();
 
+// 2. Conexión fija temporal para prueba de fuego
+var connectionString = "Server=tcp:librumdbserver.database.windows.net,1433;Initial Catalog=LibrumDB;Persist Security Info=False;User ID=CloudSA3c02abec;Password=Biblium2026*;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;";
+
 builder.Services.AddDbContext<DataContext>(opciones =>
-    opciones.UseSqlServer(builder.Configuration.GetConnectionString("CadenaSQL")));
+    opciones.UseSqlServer(connectionString));
 
 builder.Services.AddCors(options =>
 {
@@ -49,21 +55,37 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+app.UseDeveloperExceptionPage();
+
+// 3. Bloque seguro para aplicar migraciones sin bloquear el arranque si hay un fallo temporal
+using (var scope = app.Services.CreateScope())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    var services = scope.ServiceProvider;
+    try
+    {
+        var dbContext = services.GetRequiredService<DataContext>();
+        if (dbContext.Database.IsRelational())
+        {
+            dbContext.Database.Migrate();
+        }
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Ocurrió un error al aplicar las migraciones en la base de datos.");
+    }
 }
+
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
 app.UseCors("PermitirBlazor");
-app.UseAuthentication();       
-app.UseAuthorization();       
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 
 app.Run();
-
-
-

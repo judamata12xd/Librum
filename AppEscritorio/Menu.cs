@@ -24,12 +24,25 @@ namespace AppEscritorio
 
         private void reintegrarLibroToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
+            Vista Formbusqueda = new Vista();
+            Formbusqueda.ShowDialog();
         }
 
         private void gbMenu_Enter(object sender, EventArgs e)
         {
 
+        }
+
+        private void busquedaLibrosToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            BusquedaLibros formBusqueda = new BusquedaLibros();
+            formBusqueda.ShowDialog();
+        }
+
+        private void prestamoDeLibroToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            GestionPrestamos formBusqueda = new GestionPrestamos();
+            formBusqueda.ShowDialog();
         }
     }
 }
